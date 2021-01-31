@@ -5,46 +5,34 @@ Cookies are seemingly coming out of nowhere causing independent tests to fail.
 ## Installing
 
 ```
-git clone https://github.com/Qarj/cypress-test-tiny.git
-cd cypress-test-tiny
-npm i
+git clone https://github.com/Qarj/cypress-request-cookie-bug.git
+cd cypress-request-cookie-bug
+npm install
 ```
 
 ## Reproducing the problem
 
 ```
-npx cypress open
+npm run cypress:open
 ```
 
-Double click on `cookieBug.js`.
+Double click on `requestCookies.js`.
 
-## Isolating the problem
+In my testing this doesn't fail in a consistent manner, the first run may be different
+to subsequent runs. In fact, even if you close the Cypress runner entirely and reopen
+it can seem to remember the previous state as if there has been no clean-up.
 
-In the file `cypress/integration/cookieBug.js` comment out the line
+## Get the test to pass
 
+In `requestCookies.js`, uncomment these two lines:
 ```
-    causeBug();
+    // let healthcheckUrl = 'https://www.stepstone.de/membersarea/health?format=html';
+    // cy.visit(healthcheckUrl); // MUST BE .visit do not change for .request
 ```
 
-and run again, all tests should run ok.
+Now the tests passes every time.
 
-## What is happening
+Comment out the two lines again. The test continues to pass every time.
 
-The application under test opens up new browser tabs on clicking the applicable elements.
-
-We set up a spy to check that the redirect url for the new tabs is fired and is correct.
-
-This test passes perfectly fine everytime.
-
-However the subsequent tests are getting poisoned by cookies from these new tabs.
-
-What appears to happen is this:
-* Test 1 ends as soon as it has validated the redirect
-* Test 2 now starts
-* Meanwhile, the new tabs left over from test 1 continue to load and create cookies
-* These new cookies end up appearing in Test 2
-
-My understanding of Cypress is that it cannot control anything in the new browser tabs
-due to being stuck in a security sandbox.
-
-However the reverse does not appear to be true - these detached tabs / windows can affect Cypress!
+Now run `spec.js` then run `requestCookies.js` again. Now it will fail, for me
+it failed in a different way though.

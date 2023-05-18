@@ -11,14 +11,30 @@ context('Applications Cards CE', (done) => {
 
     // BUT - if you then run spec.js and try to run requestCookie.js again, it will fail
 
+    // UPDATE Thursday 18 May 2023, bug is fixed in Cypress 12.12.0
+
     cy.request({
-        url: `https://www.stepstone.de/public-api/v1/candidate/authentication`,
-        failOnStatusCode: true,
-        method: 'POST',
-        body: { "email": 'cookiebug@in.fistep.com', "password": '_cypress721', "rememberMe": true, "loginSource": "Homepage_top-login" },
-    }).then((response) => {
-        expect(response.status).to.eq(201)
+      url: 'https://www.stepstone.de/5/index.cfm?event=auth:candidate.loginregistrationpopover.labelsJson',
+      failOnStatusCode: true,
+      retryOnStatusCodeFailure: true,
+      method: 'GET',
+    }).then(() => {
+      cy.getCookie('X-AUTH-CSRF-TOKEN').then((token) => {
+        let xCsrfToken = token === null ? 'no_token' : token.value;
+        cy.request({
+          url: `https://www.stepstone.de/public-api/v1/candidate/authentication`,
+          failOnStatusCode: true,
+          retryOnStatusCodeFailure: true,
+          method: 'POST',
+          headers: { 'X-CSRF-TOKEN': xCsrfToken },
+          body: { "email": 'cookiebug@in.fistep.com', "password": '_cypress721', "rememberMe": true, "loginSource": "Homepage_top-login" },
+        })
+      })
     });
+
+
+
+
   });
 
   it('should be able to see the cookies', () => {

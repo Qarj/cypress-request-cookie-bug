@@ -1,5 +1,7 @@
 # Cypress opening new tabs causes cookies to be introduced into subsequent tests
 
+Update: This bug is fixed in Cypress 12.12.0.
+
 Cookies are seemingly coming out of nowhere causing independent tests to fail.
 
 ## Installing
